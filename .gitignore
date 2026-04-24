@@ -1,0 +1,7 @@
+node_modules/
+local.settings.json
+.env
+dist/
+.funcignore
+*.log
+.DS_Store

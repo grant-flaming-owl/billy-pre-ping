@@ -1,0 +1,19 @@
+{
+  "name": "billy-pre-ping",
+  "version": "1.0.0",
+  "description": "Billy RTB pre-ping middleware — Azure Functions v4",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "func start",
+    "test": "jest --testEnvironment node"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.0.0",
+    "ioredis": "^5.10.1",
+    "mssql": "^11.0.0",
+    "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
