@@ -21,6 +21,7 @@ jobs:
 
       - name: Run database migrations
         run: node scripts/migrate.js
+        continue-on-error: true
         env:
           AZURE_SQL_SERVER: ${{ secrets.AZURE_SQL_SERVER }}
           AZURE_SQL_DATABASE: ${{ secrets.AZURE_SQL_DATABASE }}

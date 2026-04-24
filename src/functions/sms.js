@@ -79,12 +79,15 @@ app.http('smsInbound', {
 // Returns a plain object. In single mode, _status (if set) becomes the HTTP status.
 // In batch mode, _status is ignored — every item is always included in results[].
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const safeUuid = v => (v && UUID_RE.test(v)) ? v : null;
+
 async function processSingleSms(pool, record) {
   const rawPhone = record.phone ?? record.CID;
   const campaign = record.campaign ?? null;
   const vertical = record.vertical ?? null;
-  const pingId   = record.ping_id  ?? null;
-  const mtsId    = record.mts_id   ?? null;
+  const pingId   = safeUuid(record.ping_id);  // null if not a valid UUID
+  const mtsId    = safeUuid(record.mts_id);   // null if not a valid UUID
 
   if (!rawPhone) return { action: 'error', reason: 'phone or CID is required', _status: 400 };
   if (!campaign) return { action: 'error', reason: 'campaign is required',     _status: 400 };
