@@ -37,14 +37,25 @@ app.http('smsInbound', {
       req.query.forEach((val, key) => { body[key] = val; });
     }
 
-    const pool = await getPool();
+    let pool;
+    try {
+      pool = await getPool();
+    } catch (err) {
+      console.error('[sms] DB connection failed:', err.message);
+      return json({ action: 'error', reason: `DB connection failed: ${err.message}` }, 500);
+    }
 
     // ── Batch mode ────────────────────────────────────────────────────────────
     if (Array.isArray(body.records)) {
       const records = body.records.slice(0, 200);
       const results = [];
       for (const rec of records) {
-        results.push(await processSingleSms(pool, rec));
+        try {
+          results.push(await processSingleSms(pool, rec));
+        } catch (err) {
+          console.error('[sms] batch record error:', err.message);
+          results.push({ action: 'error', reason: err.message, phone: rec.phone });
+        }
       }
       const sent   = results.filter(r => r.action === 'triggered').length;
       const failed = results.filter(r => r.action === 'error').length;
@@ -52,10 +63,15 @@ app.http('smsInbound', {
     }
 
     // ── Single mode ───────────────────────────────────────────────────────────
-    const result = await processSingleSms(pool, body);
-    const status = result._status ?? 200;
-    delete result._status;
-    return json(result, status);
+    try {
+      const result = await processSingleSms(pool, body);
+      const status = result._status ?? 200;
+      delete result._status;
+      return json(result, status);
+    } catch (err) {
+      console.error('[sms] unhandled error:', err.message);
+      return json({ action: 'error', reason: err.message }, 500);
+    }
   },
 });
 
